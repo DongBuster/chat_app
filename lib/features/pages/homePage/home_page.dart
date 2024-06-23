@@ -1,12 +1,15 @@
 import 'package:chat_app/server/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app/chat_page/chat_screen.dart';
+import 'package:provider/provider.dart';
+
+import '../../../layout/header/header.dart';
+import '../../../layout/header/viewModels/header_view_models.dart';
+import '../../../layout/header/views/drawer.dart';
 
 class HomePage extends StatefulWidget {
-  final String userName;
   const HomePage({
     super.key,
-    required this.userName,
   });
 
   @override
@@ -15,7 +18,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var socketService = SocketService();
-
+  bool isScrolling = false;
   List<Map<String, dynamic>> listUnreadMessages = [
     {'user1': ''},
     {'user2': ''},
@@ -39,16 +42,37 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     // print(listUnreadMessages[0]['user1']);
-    return Scaffold(
-      body: Column(
-        children: [
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification.metrics.axis == Axis.vertical &&
+            notification.metrics.pixels >= 30) {
+          Provider.of<HeaderViewModel>(context, listen: false)
+              .setIsScrollingTrue();
+        }
+        if (notification.metrics.axis == Axis.vertical &&
+            notification.metrics.pixels < 30) {
+          Provider.of<HeaderViewModel>(context, listen: false)
+              .setIsScrollingFalse();
+        }
+        return false;
+      },
+      child: ListView(
+        padding: const EdgeInsets.only(top: 60, bottom: 65),
+        children:
+            // List.generate(
+            //     20,
+            //     (index) => ListTile(
+            //           leading: const Icon(Icons.person_2),
+            //           title: Text('user$index'),
+            //         ))
+            [
           ListTile(
             onTap: () {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (_) => ChatScreen(
-                          currentUserName: widget.userName, romName: 'user1')));
+                      builder: (_) => const ChatScreen(
+                          currentUserName: '', romName: 'user1')));
             },
             leading: const Icon(Icons.person_2),
             title: const Text('user1'),
@@ -59,8 +83,8 @@ class _HomePageState extends State<HomePage> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (_) => ChatScreen(
-                          currentUserName: widget.userName, romName: 'user2')));
+                      builder: (_) => const ChatScreen(
+                          currentUserName: '', romName: 'user2')));
             },
             leading: const Icon(Icons.person_2),
             title: const Text('user2'),
@@ -71,8 +95,8 @@ class _HomePageState extends State<HomePage> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (_) => ChatScreen(
-                          currentUserName: widget.userName, romName: 'user3')));
+                      builder: (_) => const ChatScreen(
+                          currentUserName: '', romName: 'user3')));
             },
             leading: const Icon(Icons.person_2),
             title: const Text('user3'),

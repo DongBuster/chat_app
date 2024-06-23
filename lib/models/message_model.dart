@@ -1,4 +1,5 @@
 class Messages {
+  // late final
   late final String senderID;
   late final String receiverID;
   late final String message;

@@ -1,28 +1,56 @@
-import 'package:chat_app/home_page.dart';
-import 'package:chat_app/loginchat.dart';
+import 'dart:async';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'firebase/firebase_options.dart';
+import 'package:provider/provider.dart';
 
-import 'chat_page/chat_screen.dart';
+import 'package:chat_app/features/pages/homePage/home_page.dart';
+import 'layout/header/viewModels/header_view_models.dart';
+import 'routes/route_config.dart';
 import 'server/socket_service.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(
+        create: (_) => HeaderViewModel(),
+      ),
+    ],
+    child: const MyApp(),
+  ));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  var socketService = SocketService();
+
+  @override
+  void initState() {
+    socketService.connectAndListen();
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      routerConfig: routeConfig,
     );
   }
 }
@@ -70,7 +98,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    socketService.connectAndListen();
     // WidgetsBinding.instance.addObserver(this);
   }
 
@@ -87,6 +114,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: Text(widget.title),
         ),
-        body: const HomePage(userName: ''));
+        body: const HomePage());
   }
 }
