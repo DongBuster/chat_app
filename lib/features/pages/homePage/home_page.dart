@@ -1,11 +1,12 @@
+import 'package:chat_app/features/pages/chatPage/models/message_model.dart';
 import 'package:chat_app/server/socket_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_app/chat_page/chat_screen.dart';
+import 'package:chat_app/features/pages/chatPage/chat_screen.dart';
 import 'package:provider/provider.dart';
-
-import '../../../layout/header/header.dart';
+import '../../../common/widget_loading.dart';
 import '../../../layout/header/viewModels/header_view_models.dart';
-import '../../../layout/header/views/drawer.dart';
+import 'homePageViewModel/home_page_view_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -18,92 +19,108 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var socketService = SocketService();
+  var homePageViewModel = HomePageViewModel();
+
+  User? currentUser = FirebaseAuth.instance.currentUser;
   bool isScrolling = false;
-  List<Map<String, dynamic>> listUnreadMessages = [
-    {'user1': ''},
-    {'user2': ''},
-    {'user3': ''},
-  ];
+  List<Map<String, dynamic>> listUnreadMessages = [];
   @override
   void initState() {
-    socketService.socket?.on('receive_unread_message', (data) {
-      // print('receive: ${data['room']}');
-      for (var e in listUnreadMessages) {
-        if (e.keys.first == data['room']) {
-          setState(() {
-            e[e.keys.first] = data['message'];
-          });
+    // socketService.socket
+    //     ?.emit('user_login', FirebaseAuth.instance.currentUser?.uid ?? '');
+
+    socketService.socket?.on('receive_unread_message', _onReceiveUnreadMessage);
+    super.initState();
+  }
+
+  void _onReceiveUnreadMessage(data) {
+    MessageModel messageModel = MessageModel.fromJson(data);
+    Map<String, dynamic> message = {messageModel.roomId: messageModel.text};
+    setState(() {
+      bool exit = false;
+
+      for (var element in listUnreadMessages) {
+        if (element.keys.first == message.keys.first) {
+          element[message.keys.first] = message.values.first;
+          // print('${element.keys.first}: ${element.values.first}');
+          exit = true;
+          // print(listUnreadMessages.length);
+
+          break;
         }
       }
+      if (!exit) {
+        listUnreadMessages.add(message);
+      }
+      print(listUnreadMessages);
     });
-    super.initState();
+  }
+
+  String getMessageUnreadByRoomId(String key, List<Map<String, dynamic>> list) {
+    for (var map in list) {
+      if (map.containsKey(key)) {
+        return map[key];
+      }
+    }
+    return '';
+  }
+
+  @override
+  void dispose() {
+    socketService.socket
+        ?.off('receive_unread_message', _onReceiveUnreadMessage);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     // print(listUnreadMessages[0]['user1']);
     return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification.metrics.axis == Axis.vertical &&
-            notification.metrics.pixels >= 30) {
-          Provider.of<HeaderViewModel>(context, listen: false)
-              .setIsScrollingTrue();
-        }
-        if (notification.metrics.axis == Axis.vertical &&
-            notification.metrics.pixels < 30) {
-          Provider.of<HeaderViewModel>(context, listen: false)
-              .setIsScrollingFalse();
-        }
-        return false;
-      },
-      child: ListView(
-        padding: const EdgeInsets.only(top: 60, bottom: 65),
-        children:
-            // List.generate(
-            //     20,
-            //     (index) => ListTile(
-            //           leading: const Icon(Icons.person_2),
-            //           title: Text('user$index'),
-            //         ))
-            [
-          ListTile(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const ChatScreen(
-                          currentUserName: '', romName: 'user1')));
-            },
-            leading: const Icon(Icons.person_2),
-            title: const Text('user1'),
-            subtitle: Text('${listUnreadMessages[0]['user1']}'),
-          ),
-          ListTile(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const ChatScreen(
-                          currentUserName: '', romName: 'user2')));
-            },
-            leading: const Icon(Icons.person_2),
-            title: const Text('user2'),
-            subtitle: Text('${listUnreadMessages[1]['user2']}'),
-          ),
-          ListTile(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const ChatScreen(
-                          currentUserName: '', romName: 'user3')));
-            },
-            leading: const Icon(Icons.person_2),
-            title: const Text('user3'),
-            subtitle: Text('${listUnreadMessages[2]['user3']}'),
-          ),
-        ],
-      ),
-    );
+        onNotification: (notification) {
+          if (notification.metrics.axis == Axis.vertical &&
+              notification.metrics.pixels >= 30) {
+            Provider.of<HeaderViewModel>(context, listen: false)
+                .setIsScrollingTrue();
+          }
+          if (notification.metrics.axis == Axis.vertical &&
+              notification.metrics.pixels < 30) {
+            Provider.of<HeaderViewModel>(context, listen: false)
+                .setIsScrollingFalse();
+          }
+          return false;
+        },
+        child: StreamBuilder(
+          stream: homePageViewModel.getRooms(currentUser?.uid ?? ''),
+          builder: (context, snapshot) {
+            // print(currentUser!.uid);
+            // print(snapshot.data![0].nameRoom);
+            if (snapshot.hasData) {
+              return ListView.builder(
+                padding: const EdgeInsets.only(top: 60, bottom: 65),
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChatScreen(
+                            roomId: snapshot.data![index].id,
+                            romName: snapshot.data![index].nameRoom,
+                          ),
+                        ),
+                      );
+                    },
+                    leading: const Icon(Icons.person_2),
+                    title: Text(snapshot.data![index].nameRoom),
+                    subtitle: Text(getMessageUnreadByRoomId(
+                        snapshot.data![index].id, listUnreadMessages)),
+                  );
+                },
+              );
+            }
+            return const WidgetLoading();
+          },
+        ));
   }
 }

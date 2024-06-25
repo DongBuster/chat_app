@@ -1,14 +1,20 @@
+import 'package:chat_app/features/pages/chatPage/models/message_model.dart';
 import 'package:chat_app/server/socket_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
+import 'chatPageViewModel/chat_page_view_model.dart';
 import 'widgets/received_message_bubble.dart';
 import 'widgets/sent_message_bubble.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String currentUserName;
+  final String roomId;
   final String romName;
+  // final String
   const ChatScreen({
     super.key,
-    required this.currentUserName,
+    required this.roomId,
     required this.romName,
   });
 
@@ -18,7 +24,12 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   var socketService = SocketService();
+  var chatPageViewModel = ChatPageViewModel();
+
+  User? currentUser = FirebaseAuth.instance.currentUser;
+
   List<Widget> messages = [];
+
   TextEditingController messageController = TextEditingController();
   ScrollController scrollController = ScrollController();
 
@@ -34,23 +45,29 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+    loadInitialMessage();
+    socketService.joinRoom(widget.roomId);
+    socketService.socket?.on('receive_message', _onReceiveMessage);
+    super.initState();
+  }
 
-    socketService.joinRoom(widget.romName);
-    socketService.socket?.on('receive_message', (data) {
+  void _onReceiveMessage(data) {
+    if (mounted) {
       setState(() {
-        messages.add(ReceiveMessageBubble(message: data));
+        messages.add(
+          ReceiveMessageBubble(text: MessageModel.fromJson(data).text),
+        );
       });
       scrollToEnd();
-    });
-
-    super.initState();
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
 
-    socketService.leaveRoom(widget.romName);
+    socketService.leaveRoom(widget.roomId);
+    socketService.socket?.off('receive_message', _onReceiveMessage);
     myFocusNode.unfocus();
     myFocusNode2.unfocus();
     scrollController.dispose();
@@ -82,20 +99,52 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     }
   }
 
-  void sendMessage(String message) {
-    // final Messages messages = Messages(senderID: widget.currentUserName, receiverID: , message: message)
-    if (message.isNotEmpty) {
-      socketService.sendMessage(
-          widget.currentUserName, widget.romName, message);
-      setState(() {
-        messages.add(SentMessageBubble(message: message));
-        isShowButtonToScrollEnd = false;
+  MessageModel generateMessageModel(String messageText) {
+    final DateFormat formatter = DateFormat('HH:mm:ss dd/MM/yyyy');
+    final String timeNow = formatter.format(DateTime.now());
 
+    String id = const Uuid().v1();
+
+    List<String> userIdRoom = widget.roomId.split('_');
+    List<String> receivedId =
+        userIdRoom.where((element) => element != currentUser!.uid).toList();
+
+    return MessageModel(
+      id: id,
+      roomId: widget.roomId,
+      text: messageText,
+      senderId: currentUser?.uid ?? '',
+      receivedId: receivedId,
+      time: timeNow,
+    );
+  }
+
+  void sendMessage(String messageText) {
+    var messageModel = generateMessageModel(messageText);
+    // print(messageModel.roomId);
+    if (messageText.isNotEmpty) {
+      socketService.sendMessage(messageModel);
+      setState(() {
+        messages.add(SentMessageBubble(text: messageText));
+        chatPageViewModel.pushData(currentUser!.uid, messageModel);
+        isShowButtonToScrollEnd = false;
         scrollToEnd();
       });
 
       messageController.clear();
     }
+  }
+
+  Future<void> loadInitialMessage() async {
+    var initialMessage = await chatPageViewModel.getMessages(currentUser!.uid);
+    setState(() {
+      messages = initialMessage.map((message) {
+        return currentUser!.uid == message.senderId
+            ? SentMessageBubble(text: message.text)
+            : ReceiveMessageBubble(text: message.text);
+      }).toList();
+    });
+    scrollToEnd();
   }
 
   @override
@@ -117,7 +166,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
             color: Colors.white,
           ),
         ),
-        title: const Text('chat'),
+        title: Text(widget.romName),
       ),
       body: Stack(
         children: [
@@ -152,9 +201,15 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                 },
                 child: ListView.builder(
                   controller: scrollController,
-                  padding: const EdgeInsets.only(bottom: 60),
+                  padding: const EdgeInsets.only(bottom: 60, top: 10),
                   itemCount: messages.length,
-                  itemBuilder: (context, index) => messages[index],
+                  itemBuilder: (context, index) {
+                    return Column(
+                      children: [
+                        messages.isEmpty ? const SizedBox() : messages[index],
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
