@@ -4,12 +4,15 @@ class AccoutUser {
   late String id;
   late String email;
   late String isNewUser;
+  late String isOnline;
+
   AccoutUser({
     required this.image,
     required this.name,
     required this.id,
     required this.email,
     required this.isNewUser,
+    required this.isOnline,
   });
   AccoutUser.fromJson(Map<String, dynamic> json) {
     image = json['image'] ?? '';
@@ -17,6 +20,7 @@ class AccoutUser {
     id = json['id'] ?? '';
     email = json['email'] ?? '';
     isNewUser = json['isNewUser'] ?? '';
+    isOnline = json['isOnline'] ?? '';
   }
 
   Map<String, dynamic> toJson() {
@@ -26,6 +30,7 @@ class AccoutUser {
     data['id'] = id;
     data['email'] = email;
     data['isNewUser'] = isNewUser;
+    data['isOnline'] = isOnline;
 
     return data;
   }

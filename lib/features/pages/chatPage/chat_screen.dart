@@ -1,9 +1,14 @@
-import 'package:chat_app/features/pages/chatPage/models/message_model.dart';
-import 'package:chat_app/server/socket_service.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+
+import 'package:chat_app/features/pages/chatPage/models/message_model.dart';
+import 'package:chat_app/server/socket_service.dart';
+
 import 'chatPageViewModel/chat_page_view_model.dart';
 import 'widgets/received_message_bubble.dart';
 import 'widgets/sent_message_bubble.dart';
@@ -11,11 +16,12 @@ import 'widgets/sent_message_bubble.dart';
 class ChatScreen extends StatefulWidget {
   final String roomId;
   final String romName;
-  // final String
+  final String urlImageUserReceive;
   const ChatScreen({
     super.key,
     required this.roomId,
     required this.romName,
+    required this.urlImageUserReceive,
   });
 
   @override
@@ -46,26 +52,15 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     loadInitialMessage();
+
     socketService.joinRoom(widget.roomId);
     socketService.socket?.on('receive_message', _onReceiveMessage);
     super.initState();
   }
 
-  void _onReceiveMessage(data) {
-    if (mounted) {
-      setState(() {
-        messages.add(
-          ReceiveMessageBubble(text: MessageModel.fromJson(data).text),
-        );
-      });
-      scrollToEnd();
-    }
-  }
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-
     socketService.leaveRoom(widget.roomId);
     socketService.socket?.off('receive_message', _onReceiveMessage);
     myFocusNode.unfocus();
@@ -99,6 +94,17 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     }
   }
 
+  void _onReceiveMessage(data) async {
+    setState(() {
+      messages.add(
+        ReceiveMessageBubble(
+            urlImageUser: widget.urlImageUserReceive,
+            text: MessageModel.fromJson(data).text),
+      );
+    });
+    scrollToEnd();
+  }
+
   MessageModel generateMessageModel(String messageText) {
     final DateFormat formatter = DateFormat('HH:mm:ss dd/MM/yyyy');
     final String timeNow = formatter.format(DateTime.now());
@@ -126,7 +132,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
       socketService.sendMessage(messageModel);
       setState(() {
         messages.add(SentMessageBubble(text: messageText));
-        chatPageViewModel.pushData(currentUser!.uid, messageModel);
+        chatPageViewModel.pushData(messageModel);
         isShowButtonToScrollEnd = false;
         scrollToEnd();
       });
@@ -136,20 +142,26 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   }
 
   Future<void> loadInitialMessage() async {
-    var initialMessage = await chatPageViewModel.getMessages(currentUser!.uid);
+    var initialMessage = await chatPageViewModel.getMessages(widget.roomId);
+
     setState(() {
       messages = initialMessage.map((message) {
-        return currentUser!.uid == message.senderId
+        return currentUser!.uid == message.senderId &&
+                message.roomId == widget.roomId
             ? SentMessageBubble(text: message.text)
-            : ReceiveMessageBubble(text: message.text);
+            : ReceiveMessageBubble(
+                urlImageUser: widget.urlImageUserReceive, text: message.text);
       }).toList();
     });
-    scrollToEnd();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      scrollController.jumpTo(scrollController.position.maxScrollExtent - 150);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     var screenWidth = MediaQuery.of(context).size.width;
+    // print(currentUser!.uid);
     // print(scrollController.position.pixels);
     // print(scrollController.position.isScrollingNotifier.value);
     return Scaffold(
@@ -157,7 +169,6 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         backgroundColor: Colors.blue.shade300,
         leading: IconButton(
           onPressed: () {
-            WidgetsBinding.instance.removeObserver(this);
             Navigator.pop(context);
           },
           icon: const Icon(
@@ -166,7 +177,33 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
             color: Colors.white,
           ),
         ),
-        title: Text(widget.romName),
+        title: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(50),
+              child: widget.urlImageUserReceive == ''
+                  ? Image.asset(
+                      'assets/user_default.jpg',
+                      width: 45,
+                      height: 45,
+                    )
+                  : CachedNetworkImage(
+                      width: 45,
+                      height: 45,
+                      imageUrl: widget.urlImageUserReceive,
+                    ),
+            ),
+            const SizedBox(width: 14),
+            Text(
+              widget.romName,
+              style: const TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
       body: Stack(
         children: [
@@ -201,7 +238,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                 },
                 child: ListView.builder(
                   controller: scrollController,
-                  padding: const EdgeInsets.only(bottom: 60, top: 10),
+                  padding: const EdgeInsets.only(bottom: 65, top: 10),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     return Column(

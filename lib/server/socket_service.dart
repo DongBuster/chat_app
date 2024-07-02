@@ -3,6 +3,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import '../features/pages/chatPage/models/message_model.dart';
 
+const urlForAvdLDplayer = 'http://192.168.1.7:3500';
 const urlForWebApp = 'http://localhost:3500';
 const urlForAndroid = 'http://10.0.2.2:3500';
 
@@ -17,8 +18,8 @@ class SocketService {
   // StreamSocket streamSocket = StreamSocket();
 
   void connectAndListen() {
-    socket ??= IO.io(
-        urlForAndroid, IO.OptionBuilder().setTransports(['websocket']).build());
+    socket ??= IO.io(urlForAvdLDplayer,
+        IO.OptionBuilder().setTransports(['websocket']).build());
     socket?.connect();
     socket?.onConnect((data) {
       print('Connect to sever socket');
@@ -29,12 +30,12 @@ class SocketService {
 
   void joinRoom(String room) {
     socket?.emit('join_room', room);
-    print('Joined room: $room');
+    // print('Joined room: $room');
   }
 
   void leaveRoom(String room) {
     socket?.emit('leave_room', room);
-    print('Leave room: $room');
+    // print('Leave room: $room');
   }
 
   void sendMessage(MessageModel messageModel) {

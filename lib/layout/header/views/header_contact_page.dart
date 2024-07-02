@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../widgets/button_icon.dart';
 
@@ -14,7 +15,7 @@ class HeaderContactPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text(
-            'Danh bạ',
+            'Bạn bè',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -22,8 +23,10 @@ class HeaderContactPage extends StatelessWidget {
             ),
           ),
           ButtonIcon(
-            func: () {},
-            icon: Icons.contact_phone_outlined,
+            func: () {
+              context.push('/contactPage/addFriendsScreen');
+            },
+            icon: Icons.add,
           ),
         ],
       ),

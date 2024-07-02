@@ -79,7 +79,7 @@ class _FooterState extends State<Footer> with TickerProviderStateMixin {
             child: IconButtonFooter(
               controller: _contactController,
               icons: Icons8.people,
-              namePage: 'Danh bạ',
+              namePage: 'Bạn bè',
               color: nameRoute == '/contactPage' ? Colors.blue : Colors.black,
             ),
           ),

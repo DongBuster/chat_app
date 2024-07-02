@@ -38,19 +38,11 @@ CustomTransitionPage buildPageWithNoDefaultTransition<T>({
       key: state.pageKey,
       child: child,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(-1.0, 0.0);
-        const end = Offset.zero;
-        final tween = Tween(begin: begin, end: end);
-        final offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(
-          position: offsetAnimation,
-          child: child,
-        );
+        return MainLayout(child: child);
       });
 }
 
-CustomTransitionPage buildPageNoLayout<T>({
+CustomTransitionPage buildPageNoLayoutWithTransition<T>({
   required BuildContext context,
   required GoRouterState state,
   required Widget child,

@@ -42,6 +42,7 @@ class AuthController {
       image: user.photoURL.toString(),
       email: user.email.toString(),
       isNewUser: 'true',
+      isOnline: 'false',
     );
 
     await firestore.collection('users').doc(user.uid).set(accountUser.toJson());
@@ -63,15 +64,17 @@ class AuthController {
     _signInWithGoogle().then((userLogin) async {
       // print(userLogin);
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('islogin', true);
-      await prefs.setString('email', userLogin.user!.email!);
 
       isNewUser(userLogin.user!.uid).then((isNewUser) async {
         if (isNewUser == 'true' || isNewUser == 'false') {
           context.go('/homePage');
+          await prefs.setBool('islogin', true);
+          await prefs.setString('email', userLogin.user!.email!);
         } else {
           createUser(userLogin.user!.email!, userLogin.user!.uid);
           context.go('/homePage');
+          await prefs.setBool('islogin', true);
+          await prefs.setString('email', userLogin.user!.email!);
         }
       });
     }).catchError((error) {
@@ -97,7 +100,6 @@ class AuthController {
         (user) {
           prefs.setBool('islogin', true);
           prefs.setString('email', controllerUsername.text);
-
           context.go('/homePage');
         },
       );
