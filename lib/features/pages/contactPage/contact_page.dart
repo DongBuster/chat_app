@@ -1,9 +1,12 @@
+import 'package:chat_app/features/pages/contactPage/widgets/add_friend_widget.dart';
+import 'package:chat_app/models/accout_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'viewModels/contact_page_view_models.dart';
 import 'widgets/friend_request_widget.dart';
+import 'widgets/friend_widget.dart';
 
 class ContactPage extends StatefulWidget {
   const ContactPage({super.key});
@@ -76,7 +79,7 @@ class _ContactPageState extends State<ContactPage> {
                       ConstrainedBox(
                         constraints: BoxConstraints(
                           maxHeight: sizeScreen.height * 0.40,
-                          minHeight: 50,
+                          minHeight: 10,
                         ),
                         child: ListView.builder(
                           shrinkWrap: true,
@@ -105,7 +108,7 @@ class _ContactPageState extends State<ContactPage> {
               child: StreamBuilder(
                 stream: contactPageViewModels.getFriends(currentUser!.uid),
                 builder: (context, snapshot) {
-                  print(snapshot.data);
+                  // print(snapshot.data);
                   if (snapshot.hasData) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,14 +126,11 @@ class _ContactPageState extends State<ContactPage> {
                         ),
                         const SizedBox(width: 5),
                         ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: snapshot.data!.length,
-                          itemBuilder: (context, index) => const Column(
-                            children: [
-                              SizedBox(height: 12),
-                            ],
-                          ),
-                        ),
+                            shrinkWrap: true,
+                            itemCount: snapshot.data!.length,
+                            itemBuilder: (context, index) {
+                              return FriendWidget(user: snapshot.data![index]);
+                            }),
                       ],
                     );
                   }

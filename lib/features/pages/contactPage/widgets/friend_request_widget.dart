@@ -22,7 +22,7 @@ class _FriendRequestWidgetState extends State<FriendRequestWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print(isAccept);
+    // print(isAccept);
     return Row(
       children: [
         FutureBuilder(
@@ -32,7 +32,7 @@ class _FriendRequestWidgetState extends State<FriendRequestWidget> {
             if (snapshot.hasData) {
               return ClipRRect(
                 borderRadius: BorderRadius.circular(50),
-                child: snapshot.data == 'null'
+                child: snapshot.data == ''
                     ? Image.asset(
                         'assets/user_default.jpg',
                         width: 40,
@@ -118,6 +118,8 @@ class _FriendRequestWidgetState extends State<FriendRequestWidget> {
                                 setState(() {
                                   isAccept = true;
                                 });
+                                contactPageViewModels.acceptFriendRequest(
+                                    widget.friendRequestModel);
                               },
                               splashColor: Colors.grey.shade300,
                               child: Container(

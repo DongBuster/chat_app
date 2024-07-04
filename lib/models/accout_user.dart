@@ -14,6 +14,14 @@ class AccoutUser {
     required this.isNewUser,
     required this.isOnline,
   });
+  AccoutUser.itinial() {
+    id = '';
+    name = '';
+    image = '';
+    email = '';
+    isNewUser = 'false';
+    isOnline = 'false';
+  }
   AccoutUser.fromJson(Map<String, dynamic> json) {
     image = json['image'] ?? '';
     name = json['name'] ?? '';

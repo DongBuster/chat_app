@@ -22,10 +22,11 @@ class RoomChatWidget extends StatefulWidget {
 class _RoomChatWidgetState extends State<RoomChatWidget> {
   @override
   Widget build(BuildContext context) {
+    // print(widget.urlImage);
     return ListTile(
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(50),
-        child: widget.urlImage == ''
+        child: widget.urlImage == '' || widget.urlImage == 'null'
             ? Image.asset(
                 'assets/user_default.jpg',
                 width: 55,

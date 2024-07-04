@@ -1,19 +1,20 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../models/accout_user.dart';
 import '../services/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthController {
   static FirebaseFirestore firestore = FirebaseFirestore.instance;
-  static User get user => auth.currentUser!;
-  static FirebaseAuth auth = FirebaseAuth.instance;
+  static firebase_auth.User get user => auth.currentUser!;
+  static firebase_auth.FirebaseAuth auth = firebase_auth.FirebaseAuth.instance;
   // --- login accout google
-  static Future<UserCredential> _signInWithGoogle() async {
+  static Future<firebase_auth.UserCredential> _signInWithGoogle() async {
     // Trigger the authentication flow
 
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -23,7 +24,7 @@ class AuthController {
         await googleUser?.authentication;
 
     // Create a new credential
-    final credential = GoogleAuthProvider.credential(
+    final credential = firebase_auth.GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,
       idToken: googleAuth?.idToken,
     );
@@ -46,6 +47,8 @@ class AuthController {
     );
 
     await firestore.collection('users').doc(user.uid).set(accountUser.toJson());
+    // await Supabase.instance.client.from('rooms_chat').insert({'userId': id});
+    // await Supabase.instance.client.from('friends').insert({'userId': id});
   }
 
   static Future<String> isNewUser(String userId) async {
@@ -103,7 +106,7 @@ class AuthController {
           context.go('/homePage');
         },
       );
-    } on FirebaseAuthException catch (e) {
+    } on firebase_auth.FirebaseAuthException catch (e) {
       debugPrint('login : ${e.message}');
       if (e.message == 'The email address is badly formatted') {
         // print('asjd');
@@ -119,7 +122,6 @@ class AuthController {
   }
 
   // ---- create user
-
   static Future<void> createUserWithEmailAndPassword(
     BuildContext context,
     TextEditingController controllerUsername,
@@ -137,7 +139,7 @@ class AuthController {
           context.go('/login');
         },
       );
-    } on FirebaseAuthException catch (e) {
+    } on firebase_auth.FirebaseAuthException catch (e) {
       debugPrint('ERROR-createUserWithEmailAndPassword:${e.message}');
       if (e.message ==
           'The email address is already in use by another account.') {
@@ -185,6 +187,7 @@ final snackbarUsedEmail = SnackBar(
     contentType: ContentType.warning,
   ),
 );
+
 final snackbarPassword = SnackBar(
   elevation: 0,
   behavior: SnackBarBehavior.floating,

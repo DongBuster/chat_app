@@ -3,7 +3,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import '../features/pages/chatPage/models/message_model.dart';
 
-const urlForAvdLDplayer = 'http://192.168.1.7:3500';
+const urlForAvdLDplayer = 'http://192.168.1.5:3500';
 const urlForWebApp = 'http://localhost:3500';
 const urlForAndroid = 'http://10.0.2.2:3500';
 
@@ -49,15 +49,6 @@ class SocketService {
     });
     // print('Sent message \'$message\' fromUserId \'$userId\' to room \'$room\'');
   }
-
-  // String reviceMessage() {
-  //   String message = '';
-  //   socket?.on('receive_message', (data) {
-  //     message = data.toString();
-  //     print('Message received: $data');
-  //   });
-  //   return message;
-  // }
 
   void dispose() {
     if (socket != null) {

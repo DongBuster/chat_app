@@ -27,32 +27,34 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool isScrolling = false;
   bool isUnread = false;
 
-  Map<String, Map<String, dynamic>> unreadMessages = {};
-  // List<bool> listIsReadMessages = [];
+  Map<String, Map<String, dynamic>> lastMessages = {};
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     socketService.socket?.on('receive_unread_message', _onReceiveUnreadMessage);
+    socketService.socket?.on('receive_last_message', _onReceiveLastMessage);
+
     intialUnreadMessage();
     super.initState();
   }
 
   void _onReceiveUnreadMessage(data) {
+    // print(data);
     MessageModel messageModel = MessageModel.fromJson(data);
 
     setState(() {
       bool exit = false;
 
-      for (var key in unreadMessages.keys) {
+      for (var key in lastMessages.keys) {
         if (key == messageModel.roomId) {
-          unreadMessages[messageModel.roomId]?['text'] = messageModel.text;
-          unreadMessages[messageModel.roomId]?['isRead'] = 'false';
+          lastMessages[messageModel.roomId]?['text'] = messageModel.text;
+          lastMessages[messageModel.roomId]?['isRead'] = 'false';
           exit = true;
           break;
         }
       }
       if (exit == false) {
-        unreadMessages[messageModel.roomId] = {
+        lastMessages[messageModel.roomId] = {
           'text': messageModel.text,
           'isRead': 'false'
         };
@@ -62,17 +64,41 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
   }
 
-  void saveUnreadMessage() {
+  void _onReceiveLastMessage(data) async {
+    MessageModel messageModel = MessageModel.fromJson(data);
+
+    // print('last$data');
+    setState(() {
+      bool exit = false;
+
+      for (var key in lastMessages.keys) {
+        if (key == messageModel.roomId) {
+          lastMessages[messageModel.roomId]?['text'] = messageModel.text;
+          lastMessages[messageModel.roomId]?['isRead'] = 'true';
+          exit = true;
+          break;
+        }
+      }
+      if (exit == false) {
+        lastMessages[messageModel.roomId] = {
+          'text': messageModel.text,
+          'isRead': 'true'
+        };
+      }
+    });
+  }
+
+  void saveLastMessage() {
     final db = Localstore.instance;
-    db.collection('message').doc('unreadMessage').set(unreadMessages);
+    db.collection('message').doc('lastMessages').set(lastMessages);
   }
 
   Future<void> intialUnreadMessage() async {
     final db = Localstore.instance;
-    final data = await db.collection('message').doc('unreadMessage').get();
+    final data = await db.collection('message').doc('lastMessages').get();
     // print('data save :$data');
     setState(() {
-      unreadMessages = data?.map(
+      lastMessages = data?.map(
               (key, value) => MapEntry(key, value as Map<String, dynamic>)) ??
           {};
     });
@@ -82,15 +108,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
-      saveUnreadMessage();
+      saveLastMessage();
     }
   }
 
   @override
   void dispose() {
+    // print('disposing');
     socketService.socket
         ?.off('receive_unread_message', _onReceiveUnreadMessage);
-    saveUnreadMessage();
+    socketService.socket?.off('receive_last_message', _onReceiveLastMessage);
+    saveLastMessage();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -116,7 +144,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         stream: homePageViewModel.getRooms(currentUser?.uid ?? ''),
         builder: (context, snapshot) {
           // print(currentUser!.uid);
-          // print(snapshot.data![0].nameRoom);
+          // print(snapshot.data);
           if (snapshot.hasData) {
             return ListView.builder(
               padding: const EdgeInsets.only(top: 60, bottom: 65),
@@ -124,18 +152,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               itemBuilder: (context, index) {
                 // listIsReadMessages =
                 //     List.generate(snapshot.data!.length, (index) => );
+                // return Container(color: Colors.amber);
                 return InkWell(
                   splashColor: Colors.grey.shade200,
                   onTap: () {
                     setState(() {
-                      unreadMessages[snapshot.data![index].id]?['isRead'] =
+                      lastMessages[snapshot.data![index].roomId]?['isRead'] =
                           'true';
                     });
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => ChatScreen(
-                          roomId: snapshot.data![index].id,
+                          roomId: snapshot.data![index].roomId,
                           romName: snapshot.data![index].nameRoom,
                           urlImageUserReceive: snapshot.data![index].image,
                         ),
@@ -145,10 +174,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   child: RoomChatWidget(
                     urlImage: snapshot.data![index].image,
                     title: snapshot.data![index].nameRoom,
-                    unreadMessage:
-                        unreadMessages[snapshot.data![index].id]?['text'] ?? '',
+                    unreadMessage: lastMessages[snapshot.data![index].roomId]
+                            ?['text'] ??
+                        '',
                     isUnread: bool.parse(
-                        unreadMessages[snapshot.data![index].id]?['isRead'] ??
+                        lastMessages[snapshot.data![index].roomId]?['isRead'] ??
                             'true'),
                   ),
                 );

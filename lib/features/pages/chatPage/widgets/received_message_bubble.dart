@@ -1,8 +1,5 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
-import 'package:chat_app/features/pages/chatPage/models/message_model.dart';
 
 class ReceiveMessageBubble extends StatelessWidget {
   final String text;
@@ -21,7 +18,7 @@ class ReceiveMessageBubble extends StatelessWidget {
         const SizedBox(width: 8),
         ClipRRect(
           borderRadius: BorderRadius.circular(50),
-          child: urlImageUser == ''
+          child: urlImageUser == '' || urlImageUser == 'null'
               ? Image.asset(
                   'assets/user_default.jpg',
                   width: 25,

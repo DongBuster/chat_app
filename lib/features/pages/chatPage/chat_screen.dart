@@ -1,6 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -154,7 +152,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
       }).toList();
     });
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      scrollController.jumpTo(scrollController.position.maxScrollExtent - 150);
+      scrollController.jumpTo(scrollController.position.maxScrollExtent);
     });
   }
 
@@ -181,7 +179,8 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(50),
-              child: widget.urlImageUserReceive == ''
+              child: widget.urlImageUserReceive == '' ||
+                      widget.urlImageUserReceive == 'null'
                   ? Image.asset(
                       'assets/user_default.jpg',
                       width: 45,

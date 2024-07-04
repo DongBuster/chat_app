@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat_app/features/pages/contactPage/widgets/add_friends.dart';
+import 'package:chat_app/features/pages/contactPage/widgets/add_friend_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../models/accout_user.dart';
@@ -15,6 +16,8 @@ class AddFriendsScreen extends StatefulWidget {
 
 class _AddFriendsScreenState extends State<AddFriendsScreen> {
   var contactPageViewModel = ContactPageViewModels();
+  User? currentUser = FirebaseAuth.instance.currentUser;
+
   final _focusNode = FocusNode();
   final _controllerSearch = TextEditingController();
 
@@ -101,7 +104,7 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
           ),
           _controllerSearch.text.isEmpty
               ? StreamBuilder(
-                  stream: contactPageViewModel.streamUser(),
+                  stream: contactPageViewModel.streamListUser(currentUser!.uid),
                   builder: (context, snapshot) {
                     // print(snapshot.data);
 
@@ -121,8 +124,8 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                   },
                 )
               : StreamBuilder(
-                  stream:
-                      contactPageViewModel.searchUser(_controllerSearch.text),
+                  stream: contactPageViewModel
+                      .searchNameUser(_controllerSearch.text),
                   builder: (context, snapshot) {
                     // print(snapshot.data);
 
