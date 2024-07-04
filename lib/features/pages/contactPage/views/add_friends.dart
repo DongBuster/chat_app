@@ -103,8 +103,8 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
             ),
           ),
           _controllerSearch.text.isEmpty
-              ? StreamBuilder(
-                  stream: contactPageViewModel.streamListUser(currentUser!.uid),
+              ? FutureBuilder(
+                  future: contactPageViewModel.streamListUser(currentUser!.uid),
                   builder: (context, snapshot) {
                     // print(snapshot.data);
 

@@ -110,6 +110,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         state == AppLifecycleState.detached) {
       saveLastMessage();
     }
+    super.didChangeAppLifecycleState(state);
   }
 
   @override

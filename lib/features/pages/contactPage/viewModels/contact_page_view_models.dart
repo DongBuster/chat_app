@@ -184,22 +184,31 @@ class ContactPageViewModels {
     return name;
   }
 
-  Stream<List<AccoutUser>> streamListUser(String userId) async* {
-    final streamData = FirebaseFirestore.instance
-        .collection('users')
-        .snapshots()
-        .map((snapshot) {
-      // print(snapshot.docs.length);
-      // final filterList = snapshot.docs.removeWhere((key, value) => value == userId);
-      return snapshot.docs
-          .where((doc) => doc.data()['id'] != userId)
-          .map((doc) {
-        // print(doc.data().isEmpty);
-
-        return AccoutUser.fromJson(doc.data());
-      }).toList();
+  Future<List<AccoutUser>> streamListUser(String userId) async {
+    List<AccoutUser> listUser = [];
+    List<String> listFriend = [];
+    await Supabase.instance.client
+        .from('friends')
+        .select('idFriend')
+        .eq('userId', userId)
+        .then((listData) {
+      // print(listData);
+      for (var element in listData) {
+        listFriend.add(element['idFriend']);
+      }
     });
-    yield* streamData;
+    // print(listFriend);
+    await FirebaseFirestore.instance.collection('users').get().then((result) {
+      for (var element in result.docs) {
+        // print(e.data()['id']);
+        if (!listFriend.contains(element.data()['id']) &&
+            element.data()['id'] != userId) {
+          listUser.add(AccoutUser.fromJson(element.data()));
+        }
+      }
+    });
+
+    return listUser;
   }
 
   Stream<AccoutUser> streamUser(String userId) async* {
