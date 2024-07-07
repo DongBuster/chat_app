@@ -57,6 +57,8 @@ dependencies:
   uuid: ^4.4.0
   cached_network_image: ^3.3.1
   localstore: ^1.4.0
+  firebase_messaging: ^14.9.4
+  firebase_analytics: ^10.10.7
 
 
 
