@@ -17,12 +17,12 @@ class FriendRequestWidget extends StatefulWidget {
 
 class _FriendRequestWidgetState extends State<FriendRequestWidget> {
   var contactPageViewModels = ContactPageViewModels();
-  bool isAccept = false;
-  bool isRefuse = false;
 
   @override
   Widget build(BuildContext context) {
-    // print(isAccept);
+    bool isAccept = false;
+    bool isRefuse = false;
+    // print(_isAccept);
     return Row(
       children: [
         FutureBuilder(

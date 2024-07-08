@@ -24,7 +24,7 @@ Future<void> main() async {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InliYXNlbGlhaHliYXJ1dXVhYnF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTg5NjExMjYsImV4cCI6MjAzNDUzNzEyNn0.tTRrHL0A68WVoJZaXwaYdkHFbi1IySuuKF-np85AoIo',
   );
   final fcmToken = await FirebaseMessaging.instance.getToken();
-  print(fcmToken);
+  // print(fcmToken);
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(
@@ -46,33 +46,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   var socketService = SocketService();
   firebase_auth.User? currentUser =
       firebase_auth.FirebaseAuth.instance.currentUser;
-  late final AppLifecycleListener _listener;
+  // late final AppLifecycleListener _listener;
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(LifecycleEventHandler(
-      resumeCallBack: () async {
-        setStatusUserOnline();
-        socketService.connectAndListen();
-      },
-      pausedCallBack: () async {
-        setStatusUserOnline();
-        socketService.dispose();
-      },
-    ));
+    WidgetsBinding.instance.addObserver(this);
     // setStatusUserOnline();
     socketService.connectAndListen();
-    _listener = AppLifecycleListener(
-      onExitRequested: _handleExitRequest,
-    );
+
     super.initState();
   }
 
-  Future<AppExitResponse> _handleExitRequest() async {
-    setStatusUserOffline();
-    socketService.dispose();
-    print('exit');
-    return AppExitResponse.exit;
-  }
+  // Future<AppExitResponse> _handleExitRequest() async {
+  //   setStatusUserOffline();
+  //   socketService.dispose();
+  //   print('exit');
+  //   return AppExitResponse.exit;
+  // }
 
   Future<void> setStatusUserOnline() async {
     // print(currentUser!.uid);
@@ -91,9 +80,36 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.detached) {
+      print('here');
+      await setStatusUserOffline();
+      socketService.dispose();
+    }
+    if (state == AppLifecycleState.paused) {
+      await setStatusUserOnline();
+      socketService.connectAndListen();
+    }
+    // switch (state) {
+    //   case AppLifecycleState.detached:
+    //   case AppLifecycleState.inactive:
+    //   case AppLifecycleState.paused:
+    //     await pausedCallBack();
+    //     break;
+    //   case AppLifecycleState.resumed:
+    //     await resumeCallBack();
+    //     break;
+    //   case AppLifecycleState.hidden:
+    // }
+  }
+
+  @override
   void dispose() {
+    setStatusUserOffline();
+    socketService.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    _listener.dispose();
+    // _listener.dispose();
     super.dispose();
   }
 
@@ -122,16 +138,16 @@ class LifecycleEventHandler extends WidgetsBindingObserver {
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-    switch (state) {
-      case AppLifecycleState.detached:
-      case AppLifecycleState.inactive:
-      case AppLifecycleState.paused:
-        await pausedCallBack();
-        break;
-      case AppLifecycleState.resumed:
-        await resumeCallBack();
-        break;
-      case AppLifecycleState.hidden:
-    }
+    // switch (state) {
+    //   case AppLifecycleState.detached:
+    //   case AppLifecycleState.inactive:
+    //   case AppLifecycleState.paused:
+    //     await pausedCallBack();
+    //     break;
+    //   case AppLifecycleState.resumed:
+    //     await resumeCallBack();
+    //     break;
+    //   case AppLifecycleState.hidden:
+    // }
   }
 }

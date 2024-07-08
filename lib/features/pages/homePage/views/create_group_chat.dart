@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/features/pages/contactPage/models/friend.dart';
+import 'package:chat_app/features/pages/homePage/homePageViewModel/home_page_view_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_core/firebase_core.dart';
@@ -86,54 +87,8 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
                 ],
               ),
             ),
-            // const Padding(
-            //   padding: EdgeInsets.all(8.0),
-            //   child: Row(
-            //     children: [
-            //       Text(
-            //         'Thành viên: ',
-            //         style: TextStyle(
-            //           fontSize: 16,
-            //           color: Colors.grey,
-            //           fontWeight: FontWeight.w500,
-            //         ),
-            //       ),
-            //       SizedBox(width: 8),
-            //     ],
-            //   ),
-            // ),
-            const Expanded(child: EditableChipFieldExample()),
 
-            // const SizedBox(height: 15),
-            // Align(
-            //   alignment: Alignment.center,
-            //   child: Container(
-            //     height: 35,
-            //     width: 120,
-            //     decoration: BoxDecoration(
-            //       gradient: const LinearGradient(
-            //         colors: [
-            //           Color(0xFFd9a5b3), // Light Blue
-            //           Color(0xFF1868ae), // Greenink Purple
-            //           Color(0xFFc6d7eb), // Greenink Purple
-            //         ],
-            //         begin: Alignment.topLeft,
-            //         end: Alignment.bottomRight,
-            //       ),
-            //       borderRadius: BorderRadius.circular(12),
-            //     ),
-            //     child: const Center(
-            //       child: Text(
-            //         'Hoàn thành',
-            //         style: TextStyle(
-            //           fontSize: 16,
-            //           color: Colors.white,
-            //           fontWeight: FontWeight.w500,
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
+            const Expanded(child: EditableChipFieldExample()),
 
             // const Padding(
             //   padding: EdgeInsets.all(8),
@@ -164,6 +119,10 @@ class EditableChipFieldExample extends StatefulWidget {
 }
 
 class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
+  firebase_auth.User? currentUser =
+      firebase_auth.FirebaseAuth.instance.currentUser;
+  var homePageViewModel = HomePageViewModel();
+
   final FocusNode _chipFocusNode = FocusNode();
   List<FriendsModel> _toppings = [];
   List<FriendsModel> _suggestions = [];
@@ -209,29 +168,55 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
         ),
         Align(
           alignment: Alignment.topRight,
-          child: Container(
-            height: 35,
-            width: 90,
-            decoration: BoxDecoration(
-              // gradient: const LinearGradient(
-              //   colors: [
-              //     Color(0xFFd9a5b3), // Light Blue
-              //     Color(0xFF1868ae), // Greenink Purple
-              //     Color(0xFFc6d7eb), // Greenink Purple
-              //   ],
-              //   begin: Alignment.topLeft,
-              //   end: Alignment.bottomRight,
-              // ),
-              color: Colors.blue,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Center(
-              child: Text(
-                'Tạo',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
+          child: InkWell(
+            onTap: () async {
+              String currentUserName =
+                  await homePageViewModel.getNameUser(currentUser!.uid);
+              List<String> memberUserId = [currentUser!.uid];
+              List<String> memberUserName = [currentUserName];
+
+              for (var element in _toppings) {
+                memberUserId.add(element.idFriend);
+                memberUserName.add(element.nameFriend);
+              }
+              String roomId = memberUserId.join('_');
+              String nameRoom = memberUserName.join(', ');
+              await Supabase.instance.client.from('rooms_chat').insert({
+                "userId": currentUser!.uid,
+                "roomId": roomId,
+                "image":
+                    'https://firebasestorage.googleapis.com/v0/b/chat-app-socket-fcm.appspot.com/o/img%2Fgroup.png?alt=media&token=e9134ad5-a5bc-438e-8660-b24d54d59f75',
+                "nameRoom": nameRoom
+              });
+              for (var element in _toppings) {
+                await Supabase.instance.client.from('rooms_chat').insert({
+                  "userId": element.idFriend,
+                  "roomId": roomId,
+                  "image":
+                      'https://firebasestorage.googleapis.com/v0/b/chat-app-socket-fcm.appspot.com/o/img%2Fgroup.png?alt=media&token=937134f9-48f5-4489-bac3-c58da02f4e9c',
+                  "nameRoom": nameRoom
+                });
+              }
+              if (context.mounted) {
+                context.pop();
+              }
+            },
+            splashColor: Colors.grey.shade300,
+            child: Container(
+              height: 35,
+              width: 90,
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Center(
+                child: Text(
+                  'Tạo',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),

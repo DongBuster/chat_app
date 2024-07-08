@@ -1,35 +1,45 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_app/features/pages/chatPage/chatPageViewModel/chat_page_view_model.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ReceiveMessageBubble extends StatelessWidget {
   final String text;
-  final String urlImageUser;
+  final String userId;
   const ReceiveMessageBubble({
     super.key,
     required this.text,
-    required this.urlImageUser,
+    required this.userId,
   });
 
   @override
   Widget build(BuildContext context) {
-    // print(messageModel.text);
+    var chatPageViewModel = ChatPageViewModel();
+    // print(urlImageUser);
     return Row(
       children: [
         const SizedBox(width: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(50),
-          child: urlImageUser == '' || urlImageUser == 'null'
-              ? Image.asset(
-                  'assets/user_default.jpg',
-                  width: 25,
-                  height: 25,
-                )
-              : CachedNetworkImage(
-                  width: 25,
-                  height: 25,
-                  imageUrl: urlImageUser,
-                ),
-        ),
+        FutureBuilder(
+            future: chatPageViewModel.getUrlImageUser(userId),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data != '') {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: CachedNetworkImage(
+                    width: 25,
+                    height: 25,
+                    imageUrl: snapshot.data!,
+                  ),
+                );
+              }
+              return ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: Image.asset(
+                    'assets/user_default.jpg',
+                    width: 25,
+                    height: 25,
+                  ));
+            }),
         Align(
           alignment: Alignment.topLeft,
           child: ConstrainedBox(

@@ -89,51 +89,53 @@ class ContactPageViewModels {
     await Supabase.instance.client
         .from('friends_request')
         .select('id,senderId,receiverId')
-        .eq('status', 'accept')
+        .eq('id', model.id)
         .then((listData) async {
-      for (var index = 0; index < listData.length; index++) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(listData[index]['receiverId'])
-            .get()
-            .then((result) async {
-          Map<String, dynamic> dataUser = result.data() as Map<String, dynamic>;
+      // print(listData);
 
-          await Supabase.instance.client.from('friends').insert({
-            'userId': listData[index]['senderId'],
-            'idFriend': listData[index]['receiverId'],
-            'nameFriend': dataUser['name'],
-            'imageFriend': dataUser['image'],
-          });
-          //---- ----
-          await Supabase.instance.client.from('rooms_chat').insert({
-            "userId": listData[index]['senderId'],
-            "roomId": listData[index]['id'],
-            "image": dataUser['image'],
-            "nameRoom": dataUser['name']
-          });
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(listData[0]['receiverId'])
+          .get()
+          .then((result) async {
+        Map<String, dynamic> dataUser = result.data() as Map<String, dynamic>;
+        // print('lan1');
+        await Supabase.instance.client.from('friends').insert({
+          'userId': listData[0]['senderId'],
+          'idFriend': listData[0]['receiverId'],
+          'nameFriend': dataUser['name'],
+          'imageFriend': dataUser['image'],
         });
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(listData[index]['senderId'])
-            .get()
-            .then((result) async {
-          Map<String, dynamic> dataUser = result.data() as Map<String, dynamic>;
-          await Supabase.instance.client.from('friends').insert({
-            'userId': listData[index]['receiverId'],
-            'idFriend': listData[index]['senderId'],
-            'nameFriend': dataUser['name'],
-            'imageFriend': dataUser['image'],
-          });
-          //--- ----
-          await Supabase.instance.client.from('rooms_chat').insert({
-            "userId": listData[index]['receiverId'],
-            "roomId": listData[index]['id'],
-            "image": dataUser['image'],
-            "nameRoom": dataUser['name']
-          });
+
+        //---- ----
+        await Supabase.instance.client.from('rooms_chat').insert({
+          "userId": listData[0]['senderId'],
+          "roomId": listData[0]['id'],
+          "image": dataUser['image'],
+          "nameRoom": dataUser['name']
         });
-      }
+      });
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(listData[0]['senderId'])
+          .get()
+          .then((result) async {
+        Map<String, dynamic> dataUser = result.data() as Map<String, dynamic>;
+
+        await Supabase.instance.client.from('friends').insert({
+          'userId': listData[0]['receiverId'],
+          'idFriend': listData[0]['senderId'],
+          'nameFriend': dataUser['name'],
+          'imageFriend': dataUser['image'],
+        });
+        //--- ----
+        await Supabase.instance.client.from('rooms_chat').insert({
+          "userId": listData[0]['receiverId'],
+          "roomId": listData[0]['id'],
+          "image": dataUser['image'],
+          "nameRoom": dataUser['name']
+        });
+      });
     });
     // await Supabase.instance.client.from('friends_request').delete().eq('id', model.id);
   }

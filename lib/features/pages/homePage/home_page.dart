@@ -167,7 +167,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         builder: (_) => ChatScreen(
                           roomId: snapshot.data![index].roomId,
                           romName: snapshot.data![index].nameRoom,
-                          urlImageUserReceive: snapshot.data![index].image,
+                          urlImageRoom: snapshot.data![index].image,
                         ),
                       ),
                     );

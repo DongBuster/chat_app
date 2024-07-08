@@ -1,4 +1,5 @@
 import 'package:chat_app/features/pages/chatPage/models/message_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatPageViewModel {
@@ -30,5 +31,27 @@ class ChatPageViewModel {
       }
     });
     return list;
+  }
+
+  Future<String> getUrlImageUser(String userId) async {
+    String urlImage = '';
+    if (userId == '') {
+      return '';
+    }
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .get()
+        .then((result) {
+      Map<String, dynamic> data = result.data() as Map<String, dynamic>;
+      if (data['image'] == 'null') {
+        return '';
+      } else {
+        urlImage = data['image'];
+      }
+    }).catchError((err) {
+      return '';
+    });
+    return urlImage;
   }
 }

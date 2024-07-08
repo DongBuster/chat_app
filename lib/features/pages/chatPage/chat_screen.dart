@@ -14,12 +14,12 @@ import 'widgets/sent_message_bubble.dart';
 class ChatScreen extends StatefulWidget {
   final String roomId;
   final String romName;
-  final String urlImageUserReceive;
+  final String urlImageRoom;
   const ChatScreen({
     super.key,
     required this.roomId,
     required this.romName,
-    required this.urlImageUserReceive,
+    required this.urlImageRoom,
   });
 
   @override
@@ -93,10 +93,11 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   }
 
   void _onReceiveMessage(data) async {
+    // print(MessageModel.fromJson(data).senderId);
     setState(() {
       messages.add(
         ReceiveMessageBubble(
-            urlImageUser: widget.urlImageUserReceive,
+            userId: MessageModel.fromJson(data).senderId,
             text: MessageModel.fromJson(data).text),
       );
     });
@@ -143,13 +144,15 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     var initialMessage = await chatPageViewModel.getMessages(widget.roomId);
 
     setState(() {
-      messages = initialMessage.map((message) {
-        return currentUser!.uid == message.senderId &&
-                message.roomId == widget.roomId
-            ? SentMessageBubble(text: message.text)
-            : ReceiveMessageBubble(
-                urlImageUser: widget.urlImageUserReceive, text: message.text);
-      }).toList();
+      for (var message in initialMessage) {
+        if (currentUser!.uid == message.senderId &&
+            message.roomId == widget.roomId) {
+          messages.add(SentMessageBubble(text: message.text));
+        } else {
+          messages.add(ReceiveMessageBubble(
+              userId: message.senderId, text: message.text));
+        }
+      }
     });
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       scrollController.jumpTo(scrollController.position.maxScrollExtent);
@@ -179,8 +182,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(50),
-              child: widget.urlImageUserReceive == '' ||
-                      widget.urlImageUserReceive == 'null'
+              child: widget.urlImageRoom == '' || widget.urlImageRoom == 'null'
                   ? Image.asset(
                       'assets/user_default.jpg',
                       width: 45,
@@ -189,7 +191,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                   : CachedNetworkImage(
                       width: 45,
                       height: 45,
-                      imageUrl: widget.urlImageUserReceive,
+                      imageUrl: widget.urlImageRoom,
                     ),
             ),
             const SizedBox(width: 14),
