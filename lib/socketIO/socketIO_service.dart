@@ -18,8 +18,8 @@ class SocketService {
   // StreamSocket streamSocket = StreamSocket();
 
   void connectAndListen() {
-    socket ??= IO.io(urlForAvdLDplayer,
-        IO.OptionBuilder().setTransports(['websocket']).build());
+    socket ??= IO.io(
+        urlForAndroid, IO.OptionBuilder().setTransports(['websocket']).build());
     socket?.connect();
     socket?.onConnect((data) {
       print('Connect to sever socket');

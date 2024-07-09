@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 
 import 'layout/header/viewModels/header_view_models.dart';
 import 'routes/route_config.dart';
-import 'server/socket_service.dart';
+import 'socketIO/socketIO_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

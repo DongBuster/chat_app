@@ -3,10 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
-
 import 'package:chat_app/features/pages/chatPage/models/message_model.dart';
-import 'package:chat_app/server/socket_service.dart';
-
+import '../../../socketIO/socketIO_service.dart';
 import 'chatPageViewModel/chat_page_view_model.dart';
 import 'widgets/received_message_bubble.dart';
 import 'widgets/sent_message_bubble.dart';

@@ -1,5 +1,4 @@
 import 'package:chat_app/features/pages/chatPage/models/message_model.dart';
-import 'package:chat_app/server/socket_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app/features/pages/chatPage/chat_screen.dart';
@@ -7,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:localstore/localstore.dart';
 import '../../../common/widget_loading.dart';
 import '../../../layout/header/viewModels/header_view_models.dart';
+import '../../../socketIO/socketIO_service.dart';
 import 'homePageViewModel/home_page_view_model.dart';
 import 'widgets/room_chat.dart';
 
