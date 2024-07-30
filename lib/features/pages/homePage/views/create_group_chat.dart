@@ -1,21 +1,11 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/features/pages/contactPage/models/friend.dart';
 import 'package:chat_app/features/pages/homePage/homePageViewModel/home_page_view_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
-
-import 'package:chat_app/features/pages/homePage/views/test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../../../../models/accout_user.dart';
 import '../widgets/input_chip.dart';
 
 class CreateGroupChat extends StatefulWidget {
@@ -87,21 +77,7 @@ class _CreateGroupChatState extends State<CreateGroupChat> {
                 ],
               ),
             ),
-
             const Expanded(child: EditableChipFieldExample()),
-
-            // const Padding(
-            //   padding: EdgeInsets.all(8),
-            //   child: Text(
-            //     'Gợi ý',
-            //     style: TextStyle(
-            //       fontSize: 16,
-            //       color: Colors.grey,
-            //       fontWeight: FontWeight.w500,
-            //     ),
-            //   ),
-            // ),
-            // ListView.builder(itemBuilder: itemBuilder)
           ],
         ),
       ),
@@ -185,7 +161,7 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
                 "userId": currentUser!.uid,
                 "roomId": roomId,
                 "image":
-                    'https://firebasestorage.googleapis.com/v0/b/chat-app-socket-fcm.appspot.com/o/img%2Fgroup.png?alt=media&token=e9134ad5-a5bc-438e-8660-b24d54d59f75',
+                    'https://firebasestorage.googleapis.com/v0/b/chat-app-socket-fcm.appspot.com/o/img%2Fgroup-chat.png?alt=media&token=d1c7538b-d443-4b34-84e2-925c3c1c7309',
                 "nameRoom": nameRoom
               });
               for (var element in _toppings) {
@@ -193,7 +169,7 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
                   "userId": element.idFriend,
                   "roomId": roomId,
                   "image":
-                      'https://firebasestorage.googleapis.com/v0/b/chat-app-socket-fcm.appspot.com/o/img%2Fgroup.png?alt=media&token=937134f9-48f5-4489-bac3-c58da02f4e9c',
+                      'https://firebasestorage.googleapis.com/v0/b/chat-app-socket-fcm.appspot.com/o/img%2Fgroup-chat.png?alt=media&token=d1c7538b-d443-4b34-84e2-925c3c1c7309',
                   "nameRoom": nameRoom
                 });
               }
@@ -219,6 +195,17 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
                   ),
                 ),
               ),
+            ),
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.all(8),
+          child: Text(
+            'Gợi ý',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -304,7 +291,7 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
           .then((listData) {
         for (var element in listData) {
           var friend = FriendsModel.fromJson(element);
-          if (friend.nameFriend.contains(text)) {
+          if (friend.nameFriend.toLowerCase().contains(text.toLowerCase())) {
             listFriend.add(friend);
           }
         }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:chat_app/features/pages/chatPage/models/message_model.dart';
+import '../../../FCM/notificationService/notification_service.dart';
 import '../../../socketIO/socketIO_service.dart';
 import 'chatPageViewModel/chat_page_view_model.dart';
 import 'widgets/received_message_bubble.dart';
@@ -133,7 +134,12 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         isShowButtonToScrollEnd = false;
         scrollToEnd();
       });
-
+      NotificationService().pushNotifications(
+        title: messageModel.senderId,
+        body: messageText,
+        token:
+            'eEN3BPKYRV2EIWh5-qqNMz:APA91bFnAGyo_-H2_g-oj8TfMQ1MVOCXAWjlJGqNFJcuFXEG-K7jCpKIH_a9AMejOocu2pIHhDB_CQsxlVPy-Q2R-0tECCicD1ocwdFFEiC0KlORjnKehkqzGiuNjz46SQ-OXnc9kSnR',
+      );
       messageController.clear();
     }
   }

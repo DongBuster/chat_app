@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:chat_app/features/pages/chatPage/chat_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:localstore/localstore.dart';
+import '../../../FCM/local_notification_service.dart';
 import '../../../common/widget_loading.dart';
 import '../../../layout/header/viewModels/header_view_models.dart';
 import '../../../socketIO/socketIO_service.dart';
@@ -31,6 +32,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+
+    //---- fcm----
+    LocalNotificationService().uploadFcmToken();
+
     socketService.socket?.on('receive_unread_message', _onReceiveUnreadMessage);
     socketService.socket?.on('receive_last_message', _onReceiveLastMessage);
 
