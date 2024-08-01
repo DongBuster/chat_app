@@ -9,23 +9,7 @@ class NotificationService {
   //--- get FCM server key ---
   Future<String> getAccessToken() async {
     // Your client ID and client secret obtained from Google Cloud Console
-    final serviceAccountJson = {
-      "type": "service_account",
-      "project_id": "chat-app-socket-fcm",
-      "private_key_id": "444906461d5049ab76587fcfb9d78c215644d8ac",
-      "private_key":
-          "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCTSZC8ePL41dAT\n4w8F5iNRdejn5bD2Q7rIO9Ay9Llm+EdzbC2/XdcXtCY0emymoOKbgXkN0smHUj6v\nM4sklmkXIluhLyscY3PKuXRKQTTqrpr0YSnmwKeqJi5tkIr1c8HouO5c62siFPBZ\nxLqrzADcTU047IdDryMBOvFaGMcg3DatZlXioHh2XtWWm3WIlk+YbWB1RIrc7m8S\nIy7xo/wGese4tve7swvbPlvvWcQXUMbCgrUwKBhv60P/j2P9/ju+FPqYroAuxhwP\nKnPqeZNZwORJ+GnAJDF0ZigAgGHe19DVp70dS/A5iceNtycKXNvdm2ExbGTfBGqv\nTzUQnLm7AgMBAAECggEARQMFvcHAOwbYEdFkoyNzrgIc6LdvhNw0Ywjfo1iWnKA9\nvl/USaPbGkCvXAx251ZgB3QReAAprG3FcEsq6bBOOmg/XdVfklQpF7ZwvjAybrn0\nYgg63WOsy+VLAMxmx95+35/zE/e8wYHlInKy8rdKOe9AfSkasgSYVsW6+7e7afH+\npBfmBKUDvQ8vCrEHUEmlQPplstR1OWCoQ7tkAaolI7RruKczz4ruHnoa9ZfSBzSo\nYY619aZqOpuBOVXQGclRN70TVaomqr+l0BlWQzmKxkJODsO5+61brR9EoUJlHT9f\nPY+V2ayhDJT1nImChesejJlYZt3MuUopP1FDHEuNAQKBgQDOFTnV+64A3QMChglB\nCOBGPq7PfBa4pWp3PBxxtNsvIfMbaE06Eyvv0HJgYW+UC4ZFYXGGsqc8k8LXyUrs\n+cs1sjjOZgqDEU8jDDtO4u4LqB//AFIbtJssyNJrE2LGz2ay7Fi2kukh9gTOK2A0\nI7cRkLl2hH2pkgux41fRxNJnAQKBgQC29oylabIme2sBOvq9PljqOoFj0uyz2glq\nxF4rK1FS/56iEEEWTPjKvTFJcVadNxtrwY48jBCCjGgmaPAQfqQ4OpF6qTwbL76b\nAjdIkpUYsSgk1XRC+HQrWC5eoRnmrWoiiwA9dOK+UFdbr8lskEYWzOs2TwanMzhr\nFgzzkAd8uwKBgBooyZmnA/RqGZq1ZvFRbh6ckFYYG04++R+/iqDIY1Y9Sf29pKft\njRM483vWgnJZcCbYcq+1d9MRspbvn0orfycGw303qLfwd4osYE7oMW1bXwxgfwuz\nRktOBp++6zfvVcr6g1xRk7RS5VNCYEjeC7v4EgLAWK8wsblX8WrYQBkBAoGAZhJy\nMK4g11svPUZ8MCuiSzpMiTZZG5Vef5QBvS+zdQxqoZtT1G8otWKLJp/2ZEskHx+i\njKDPbSWLzTHqDCm60CvMkZPslnYybiP0V6Z/S4E6FiKHc/1MQgo2BFD4NDs25QKL\nJb4Z6XbE5b/SLaDnmTzFVE0ONyVaKlPo8dC+fJUCgYBswg7VI6pQoiI+N4x8X5Bm\nz6sGlZsUOE1j2iwLBwqqs2bWHNJcSm6VL+6kC2WNrFJ46OKFcP0F2mewmKGr+Qaq\nF4HVAYvMWDlM5QU9IWIx5NVhvTCl0kDkd4pnfd5Ia+Q21CKFc5LiYCYcpJDiC+VU\nWISoepwJHFxwyJtjOrfFzw==\n-----END PRIVATE KEY-----\n",
-      "client_email":
-          "firebase-adminsdk-mqund@chat-app-socket-fcm.iam.gserviceaccount.com",
-      "client_id": "103776444726416538217",
-      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-      "token_uri": "https://oauth2.googleapis.com/token",
-      "auth_provider_x509_cert_url":
-          "https://www.googleapis.com/oauth2/v1/certs",
-      "client_x509_cert_url":
-          "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-mqund%40chat-app-socket-fcm.iam.gserviceaccount.com",
-      "universe_domain": "googleapis.com"
-    };
+    final serviceAccountJson = {};
 
     List<String> scopes = [
       "https://www.googleapis.com/auth/userinfo.email",
