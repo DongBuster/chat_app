@@ -12,33 +12,35 @@ class LocalNotificationService {
     }
   }
 
+  //--- save FCMToken device user ----
   final firebaseFirestore = FirebaseFirestore.instance;
   final _currentUser = FirebaseAuth.instance.currentUser;
   Future<void> uploadFcmToken() async {
     try {
+      // FirebaseMessaging.o
       await FirebaseMessaging.instance.getToken().then((token) async {
         print('token: $token');
         await firebaseFirestore
             .collection('FcmUser')
-            .doc()
-            .set({'userId': _currentUser!.uid, 'notificationToken': token});
+            .doc(_currentUser!.uid)
+            .set({'userId': _currentUser.uid, 'notificationToken': token});
       });
       FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
         print('onTokenRefesh: $token');
         await firebaseFirestore
             .collection('FcmUser')
             .doc(_currentUser!.uid)
-            .set({'userId': _currentUser.uid, 'notificationToken': token});
+            .update({'notificationToken': token});
       });
     } catch (e) {
       print(e.toString());
     }
   }
 
+  //--- Initialize native android notification ---
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   Future<void> init() async {
-    // Initialize native android notification
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const InitializationSettings initializationSettings =
@@ -46,6 +48,7 @@ class LocalNotificationService {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
+  //--- setup and show notification ----
   showNotification(RemoteMessage message) async {
     const AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(

@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../features/auth/services/auth.dart';
+import '../../../features/auth/services/auth_service.dart';
+import '../viewModels/header_view_models.dart';
 import '../widgets/card_item.dart';
 
 class DrawerScreen extends StatefulWidget {
@@ -16,57 +16,6 @@ class DrawerScreen extends StatefulWidget {
 
 class _DrawerScreenState extends State<DrawerScreen> {
   User? currentUser = FirebaseAuth.instance.currentUser;
-
-  @override
-  void initState() {
-    // getUrlImageUser(currentUser?.uid ?? '');
-    // getNameUser()
-    super.initState();
-  }
-
-  Future<String> getUrlImageUser(String userId) async {
-    String urlImage = '';
-    if (userId == '') {
-      return '';
-    }
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .get()
-        .then((result) {
-      Map<String, dynamic> data = result.data() as Map<String, dynamic>;
-      if (data['image'] == 'null') {
-        return '';
-      } else {
-        urlImage = data['image'];
-      }
-    }).catchError((err) {
-      return '';
-    });
-    return urlImage;
-  }
-
-  Future<String> getNameUser(String userId) async {
-    String name = '';
-    if (userId == '') {
-      return '';
-    }
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .get()
-        .then((result) {
-      Map<String, dynamic> data = result.data() as Map<String, dynamic>;
-      if (data['name'] == 'null') {
-        return '';
-      } else {
-        name = data['name'];
-      }
-    }).catchError((err) {
-      return '';
-    });
-    return name;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +33,8 @@ class _DrawerScreenState extends State<DrawerScreen> {
               Row(
                 children: [
                   FutureBuilder(
-                    future: getUrlImageUser(currentUser?.uid ?? ''),
+                    future:
+                        HeaderViewModel.getUrlImageUser(currentUser?.uid ?? ''),
                     builder: (context, snapshot) {
                       // print(snapshot.data);
                       // print(1);
@@ -122,7 +72,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
                   ),
                   const SizedBox(width: 12),
                   FutureBuilder(
-                    future: getNameUser(currentUser?.uid ?? ''),
+                    future: HeaderViewModel.getNameUser(currentUser?.uid ?? ''),
                     builder: (context, snapshot) {
                       // print(snapshot.data);
                       if (snapshot.hasData) {

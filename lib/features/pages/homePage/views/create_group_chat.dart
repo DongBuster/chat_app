@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat_app/features/pages/contactPage/models/friend.dart';
+import 'package:chat_app/features/pages/contactPage/models/friend_model.dart';
 import 'package:chat_app/features/pages/homePage/homePageViewModel/home_page_view_model.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
@@ -100,8 +100,8 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
   var homePageViewModel = HomePageViewModel();
 
   final FocusNode _chipFocusNode = FocusNode();
-  List<FriendsModel> _toppings = [];
-  List<FriendsModel> _suggestions = [];
+  List<FriendModel> _toppings = [];
+  List<FriendModel> _suggestions = [];
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +123,7 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
               ),
             ),
             Expanded(
-              child: ChipsInput<FriendsModel>(
+              child: ChipsInput<FriendModel>(
                 values: _toppings,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.only(left: 9),
@@ -228,16 +228,16 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
   Future<void> _onSearchChanged(String value) async {
     firebase_auth.User? currentUser =
         firebase_auth.FirebaseAuth.instance.currentUser;
-    final List<FriendsModel> results =
+    final List<FriendModel> results =
         await _suggestionCallback(value, currentUser!.uid);
     setState(() {
       _suggestions = results
-          .where((FriendsModel topping) => !_toppings.contains(topping))
+          .where((FriendModel topping) => !_toppings.contains(topping))
           .toList();
     });
   }
 
-  Widget _chipBuilder(BuildContext context, FriendsModel topping) {
+  Widget _chipBuilder(BuildContext context, FriendModel topping) {
     return ToppingInputChip(
       topping: topping,
       onDeleted: _onChipDeleted,
@@ -245,16 +245,16 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
     );
   }
 
-  void _selectSuggestion(FriendsModel topping) {
+  void _selectSuggestion(FriendModel topping) {
     setState(() {
       _toppings.add(topping);
       _suggestions = [];
     });
   }
 
-  void _onChipTapped(FriendsModel topping) {}
+  void _onChipTapped(FriendModel topping) {}
 
-  void _onChipDeleted(FriendsModel topping) {
+  void _onChipDeleted(FriendModel topping) {
     setState(() {
       _toppings.remove(topping);
       _suggestions = [];
@@ -274,15 +274,15 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
     }
   }
 
-  void _onChanged(List<FriendsModel> data) {
+  void _onChanged(List<FriendModel> data) {
     setState(() {
       _toppings = data;
     });
   }
 
-  FutureOr<List<FriendsModel>> _suggestionCallback(
+  FutureOr<List<FriendModel>> _suggestionCallback(
       String text, String currentUserId) async {
-    List<FriendsModel> listFriend = [];
+    List<FriendModel> listFriend = [];
     if (text.isNotEmpty) {
       await Supabase.instance.client
           .from('friends')
@@ -290,7 +290,7 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
           .eq('userId', currentUserId)
           .then((listData) {
         for (var element in listData) {
-          var friend = FriendsModel.fromJson(element);
+          var friend = FriendModel.fromJson(element);
           if (friend.nameFriend.toLowerCase().contains(text.toLowerCase())) {
             listFriend.add(friend);
           }
@@ -305,8 +305,8 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
 class ToppingSuggestion extends StatelessWidget {
   const ToppingSuggestion(this.topping, {super.key, this.onTap});
 
-  final FriendsModel topping;
-  final ValueChanged<FriendsModel>? onTap;
+  final FriendModel topping;
+  final ValueChanged<FriendModel>? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -339,9 +339,9 @@ class ToppingInputChip extends StatelessWidget {
     required this.onSelected,
   });
 
-  final FriendsModel topping;
-  final ValueChanged<FriendsModel> onDeleted;
-  final ValueChanged<FriendsModel> onSelected;
+  final FriendModel topping;
+  final ValueChanged<FriendModel> onDeleted;
+  final ValueChanged<FriendModel> onSelected;
 
   @override
   Widget build(BuildContext context) {

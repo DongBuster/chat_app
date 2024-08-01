@@ -2,10 +2,10 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:go_router/go_router.dart';
 import '../../../common/overlay_loading.dart';
-import '../controller/auth_controller.dart';
+import '../../../common/snackbar_common.dart';
+import '../authViewModel/auth_view_model.dart';
 import '../widgets/input_field.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -33,7 +33,7 @@ class _RegisterPageState extends State<RegisterPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // --- title page ---
+            //--- title page ---
             const Expanded(
               child: Center(
                 // padding: EdgeInsets.only(top: 50),
@@ -47,7 +47,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
             ),
-            // -- field ---
+            //-- field ---
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -95,7 +95,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 const Gap(25),
-                // --- register button ---
+                //--- register button ---
                 GestureDetector(
                   onTap: () async {
                     OverlayState overlayState = Overlay.of(context);
@@ -107,10 +107,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     if (_formKeyRegister.currentState!.validate()) {
                       if (_controllerConfirmPassword.text.toString() !=
                           _controllerPassword.text.toString()) {
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackbarCommon.snackBarErrorPasswordNotMatch);
                       } else {
                         overlayState.insert(overlayEntry);
-                        await AuthController.createUserWithEmailAndPassword(
+                        await AuthViewModel.createUserWithEmailAndPassword(
                           context,
                           _controllerUsername,
                           _controllerPassword,
@@ -139,9 +140,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         )),
                   ),
                 ),
-
                 const Gap(40),
-
                 const Text(
                   'Or Sign Up Using',
                   style: TextStyle(
@@ -150,19 +149,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 const Gap(15),
-                // other login
+                //--- button login accout google ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton.filled(
-                      style: const ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(Colors.white),
-                        side: MaterialStatePropertyAll(
-                          BorderSide(
-                            color: Color(0xff4caf50),
-                          ),
-                        ),
-                      ),
                       onPressed: () {},
                       icon: SvgPicture.asset(
                         'assets/icon_google.svg',
@@ -208,15 +199,3 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-
-final snackBar = SnackBar(
-  elevation: 0,
-  behavior: SnackBarBehavior.floating,
-  backgroundColor: Colors.transparent,
-  content: AwesomeSnackbarContent(
-    title: 'Warning!',
-    message:
-        'Passwords do not match! Please check your password and your confirmed password !',
-    contentType: ContentType.warning,
-  ),
-);

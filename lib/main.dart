@@ -13,6 +13,30 @@ import 'layout/header/viewModels/header_view_models.dart';
 import 'routes/route_config.dart';
 import 'socketIO/socketIO_service.dart';
 
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  LocalNotificationService().showNotification(message);
+}
+
+Future<void> setStatusUserOnline() async {
+  // print(currentUser!.uid);
+  firebase_auth.User? currentUser =
+      firebase_auth.FirebaseAuth.instance.currentUser;
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(currentUser!.uid)
+      .update({'isOnline': 'true'});
+}
+
+Future<void> setStatusUserOffline() async {
+  firebase_auth.User? currentUser =
+      firebase_auth.FirebaseAuth.instance.currentUser;
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(currentUser!.uid)
+      .update({'isOnline': 'false'});
+  // print('offline');
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -25,6 +49,12 @@ Future<void> main() async {
   );
   LocalNotificationService().requestPermission();
   LocalNotificationService().init();
+
+  //---- ----
+  // ErrorWidget.builder =  (FlutterErrorDetails errorDetail){
+  //   errorDetail.
+  //   return Container();
+  // }
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(
@@ -44,47 +74,29 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   var socketService = SocketService();
-  firebase_auth.User? currentUser =
-      firebase_auth.FirebaseAuth.instance.currentUser;
+
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
-    // setStatusUserOnline();
+    setStatusUserOnline();
+    //---- fcm----
+    LocalNotificationService().uploadFcmToken();
     socketService.connectAndListen();
     notificationHandler();
     super.initState();
   }
 
   void notificationHandler() {
-    FirebaseMessaging.onMessage.listen((remoteMessage) async {
-      // print(remoteMessage.notification!.title);
-      LocalNotificationService().showNotification(remoteMessage);
-    });
-  }
-
-  Future<void> setStatusUserOnline() async {
-    // print(currentUser!.uid);
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser!.uid)
-        .update({'isOnline': 'true'});
-  }
-
-  Future<void> setStatusUserOffline() async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser!.uid)
-        .update({'isOnline': 'false'});
-    // print('offline');
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   }
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
-    print(state);
+    // print(state);
     if (state == AppLifecycleState.paused) {
-      print('detached');
-      await setStatusUserOffline();
+      // print('detached');
+      // setStatusUserOffline();
       socketService.dispose();
     }
     if (state == AppLifecycleState.resumed) {
@@ -99,7 +111,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void dispose() {
     socketService.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    // _listener.dispose();
     super.dispose();
   }
 

@@ -1,9 +1,8 @@
 import 'package:chat_app/features/pages/contactPage/models/friends_request_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../../../models/accout_user.dart';
-import '../models/friend.dart';
+import '../models/friend_model.dart';
 
 class ContactPageViewModels {
   //--- ------
@@ -24,7 +23,7 @@ class ContactPageViewModels {
     yield* stream;
   }
 
-  Stream<List<FriendsModel>> getFriends(String userId) async* {
+  Stream<List<FriendModel>> getFriends(String userId) async* {
     final supabase = Supabase.instance.client;
     final stream = supabase
         .from('friends')
@@ -33,7 +32,7 @@ class ContactPageViewModels {
         .map((listData) {
           // print(listData);
 
-          return listData.map((e) => FriendsModel.fromJson(e)).toList();
+          return listData.map((e) => FriendModel.fromJson(e)).toList();
         });
     yield* stream;
   }

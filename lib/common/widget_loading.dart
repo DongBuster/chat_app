@@ -20,19 +20,19 @@ class _WidgetLoadingState extends State<WidgetLoading> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Icon(Icons.circle, size: 10, color: Colors.blue)
+          const Icon(Icons.circle, size: 8, color: Colors.blue)
               .animate(
                   delay: 100.milliseconds,
                   onPlay: (controller) => controller.repeat())
               .moveY(begin: 1, end: -1),
           const Gap(2),
-          const Icon(Icons.circle, size: 10, color: Colors.blue)
+          const Icon(Icons.circle, size: 8, color: Colors.blue)
               .animate(
                   delay: 200.milliseconds,
                   onPlay: (controller) => controller.repeat())
               .moveY(begin: 2, end: -2),
           const Gap(2),
-          const Icon(Icons.circle, size: 10, color: Colors.blue)
+          const Icon(Icons.circle, size: 8, color: Colors.blue)
               .animate(
                   delay: 300.milliseconds,
                   onPlay: (controller) => controller.repeat())

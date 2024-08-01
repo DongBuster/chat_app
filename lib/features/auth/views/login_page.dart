@@ -4,7 +4,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import '../../../common/overlay_loading.dart';
-import '../controller/auth_controller.dart';
+import '../authViewModel/auth_view_model.dart';
 import '../widgets/input_field.dart';
 
 class LoginPage extends StatefulWidget {
@@ -63,6 +63,7 @@ class _LoginPageState extends State<LoginPage> {
                   key: _formKey,
                   child: Column(
                     children: [
+                      //--- field email ---
                       UsernameFied(
                         title: 'Email',
                         hintText: 'Type your email',
@@ -75,6 +76,8 @@ class _LoginPageState extends State<LoginPage> {
                         focusNode: _focusNodeUsername,
                       ),
                       // const Gap(20),
+
+                      //--- field password ---
                       PasswordFieldLoginPage(
                         title: 'Password',
                         hintText: 'Type your password',
@@ -101,12 +104,12 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const Gap(25),
-                //-- button login
+                //--- button login ---
                 GestureDetector(
                   onTap: () async {
                     if (_formKey.currentState!.validate()) {
                       overlayState.insert(overlayEntry);
-                      await AuthController.signInWithEmailAndPassword(
+                      await AuthViewModel.signInWithEmailAndPassword(
                               context, _controllerUsername, _controllerPassword)
                           .then((value) {
                         overlayEntry.remove();
@@ -136,7 +139,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-
                 const Gap(40),
                 const Text(
                   'Or Sign Up Using',
@@ -146,13 +148,14 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const Gap(15),
+                //--- button login accout google ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton.filled(
                       style: const ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(Colors.white),
-                        side: MaterialStatePropertyAll(
+                        backgroundColor: WidgetStatePropertyAll(Colors.white),
+                        side: WidgetStatePropertyAll(
                           BorderSide(
                             color: Color(0xff4caf50),
                           ),
@@ -161,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () async {
                         overlayState.insert(overlayEntry);
 
-                        await AuthController.handleGoogleBtnClick(context)
+                        await AuthViewModel.handleGoogleBtnClick(context)
                             .whenComplete(() => overlayEntry.remove());
                         // if (context.mounted) {
                         //
@@ -178,6 +181,7 @@ class _LoginPageState extends State<LoginPage> {
                 const Gap(80),
               ],
             ),
+            //--- navigator register page ---
             Padding(
               padding: const EdgeInsets.only(bottom: 15),
               child: AnimatedTextKit(

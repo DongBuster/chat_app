@@ -1,9 +1,5 @@
-import 'package:chat_app/features/pages/contactPage/widgets/add_friend_widget.dart';
-import 'package:chat_app/models/accout_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'viewModels/contact_page_view_models.dart';
 import 'widgets/friend_request_widget.dart';
 import 'widgets/friend_widget.dart';

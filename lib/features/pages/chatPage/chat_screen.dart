@@ -1,10 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
 import 'package:chat_app/features/pages/chatPage/models/message_model.dart';
-import '../../../FCM/notificationService/notification_service.dart';
+import '../../../FCM/fcm_service.dart';
+import '../../../common/image_user_default.dart';
 import '../../../socketIO/socketIO_service.dart';
 import 'chatPageViewModel/chat_page_view_model.dart';
 import 'widgets/received_message_bubble.dart';
@@ -27,7 +26,6 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   var socketService = SocketService();
-  var chatPageViewModel = ChatPageViewModel();
 
   User? currentUser = FirebaseAuth.instance.currentUser;
 
@@ -79,6 +77,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     });
   }
 
+  //--- when the keyboard appears, scroll to end list message ---
   @override
   void didChangeMetrics() {
     super.didChangeMetrics();
@@ -103,49 +102,27 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     scrollToEnd();
   }
 
-  MessageModel generateMessageModel(String messageText) {
-    final DateFormat formatter = DateFormat('HH:mm:ss dd/MM/yyyy');
-    final String timeNow = formatter.format(DateTime.now());
-
-    String id = const Uuid().v1();
-
-    List<String> userIdRoom = widget.roomId.split('_');
-    List<String> receivedId =
-        userIdRoom.where((element) => element != currentUser!.uid).toList();
-
-    return MessageModel(
-      id: id,
-      roomId: widget.roomId,
-      text: messageText,
-      senderId: currentUser?.uid ?? '',
-      receivedId: receivedId,
-      time: timeNow,
-    );
-  }
-
   void sendMessage(String messageText) {
-    var messageModel = generateMessageModel(messageText);
+    MessageModel messageModel = ChatPageViewModel.generateMessageModel(
+        messageText, widget.roomId, currentUser?.uid ?? '');
     // print(messageModel.roomId);
     if (messageText.isNotEmpty) {
       socketService.sendMessage(messageModel);
       setState(() {
         messages.add(SentMessageBubble(text: messageText));
-        chatPageViewModel.pushData(messageModel);
+        ChatPageViewModel.pushData(messageModel);
         isShowButtonToScrollEnd = false;
         scrollToEnd();
       });
-      NotificationService().pushNotifications(
-        title: messageModel.senderId,
-        body: messageText,
-        token:
-            'eEN3BPKYRV2EIWh5-qqNMz:APA91bFnAGyo_-H2_g-oj8TfMQ1MVOCXAWjlJGqNFJcuFXEG-K7jCpKIH_a9AMejOocu2pIHhDB_CQsxlVPy-Q2R-0tECCicD1ocwdFFEiC0KlORjnKehkqzGiuNjz46SQ-OXnc9kSnR',
-      );
+      NotificationService()
+          .sendDataToFCM(messageText, widget.romName, messageModel.receivedId);
+
       messageController.clear();
     }
   }
 
   Future<void> loadInitialMessage() async {
-    var initialMessage = await chatPageViewModel.getMessages(widget.roomId);
+    var initialMessage = await ChatPageViewModel.getMessages(widget.roomId);
 
     setState(() {
       for (var message in initialMessage) {
@@ -187,11 +164,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
             ClipRRect(
               borderRadius: BorderRadius.circular(50),
               child: widget.urlImageRoom == '' || widget.urlImageRoom == 'null'
-                  ? Image.asset(
-                      'assets/user_default.jpg',
-                      width: 45,
-                      height: 45,
-                    )
+                  ? const ImageUserDefault(width: 45, height: 45)
                   : CachedNetworkImage(
                       width: 45,
                       height: 45,
@@ -210,8 +183,10 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
           ],
         ),
       ),
+      //--- ----
       body: Stack(
         children: [
+          //--- render list message ---
           GestureDetector(
             onTap: () {
               myFocusNode.unfocus();
@@ -224,7 +199,6 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
                   // print('notification:$isUserScrolling');
-
                   if (notification.metrics.axis == Axis.vertical) {
                     if (notification.metrics.pixels <
                         (notification.metrics.maxScrollExtent - 150)) {
@@ -256,6 +230,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
               ),
             ),
           ),
+          //--- show/hide button scroll to end list message ---
           isShowButtonToScrollEnd
               ? Positioned(
                   bottom: 70,
@@ -284,12 +259,14 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                   ),
                 )
               : const SizedBox(),
+          //--- footer ---
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Stack(
               children: [
+                //--- view 1 ---
                 Container(
                   color: Colors.white,
                   height: 60,
@@ -325,6 +302,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                           color: Colors.blue,
                         ),
                       ),
+                      //---  ---
                       SizedBox(
                         width: screenWidth - 160,
                         height: 40,
@@ -379,6 +357,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                     ],
                   ),
                 ),
+                //--- show/hide view 2 ---
                 isHideInput
                     ? const SizedBox()
                     : Positioned(
@@ -514,7 +493,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                       ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

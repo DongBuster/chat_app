@@ -1,18 +1,18 @@
-class FriendsModel {
+class FriendModel {
   late int id;
   late String userId;
   late String idFriend;
   late String imageFriend;
   late String nameFriend;
 
-  FriendsModel({
+  FriendModel({
     required this.id,
     required this.userId,
     required this.idFriend,
     required this.imageFriend,
     required this.nameFriend,
   });
-  FriendsModel.fromJson(Map<String, dynamic> json) {
+  FriendModel.fromJson(Map<String, dynamic> json) {
     id = json["id"] ?? -1;
     userId = json["userId"] ?? '';
     idFriend = json["idFriend"] ?? '';

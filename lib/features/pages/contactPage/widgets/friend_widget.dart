@@ -1,15 +1,11 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat_app/features/pages/contactPage/models/friend.dart';
-import 'package:chat_app/features/pages/contactPage/models/friends_request_model.dart';
+import 'package:chat_app/features/pages/contactPage/models/friend_model.dart';
 import 'package:chat_app/features/pages/contactPage/viewModels/contact_page_view_models.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_app/models/accout_user.dart';
-import 'package:intl/intl.dart';
 
 class FriendWidget extends StatefulWidget {
-  final FriendsModel user;
+  final FriendModel user;
   const FriendWidget({
     super.key,
     required this.user,

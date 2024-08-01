@@ -1,8 +1,6 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-
 import 'viewModels/header_view_models.dart';
 import 'views/header_contact_page.dart';
 import 'views/header_home_page.dart';
@@ -16,7 +14,7 @@ class Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var isScrolling =
+    bool isScrolling =
         Provider.of<HeaderViewModel>(context, listen: true).isScrolling;
     String nameRoute = GoRouterState.of(context).uri.toString();
 

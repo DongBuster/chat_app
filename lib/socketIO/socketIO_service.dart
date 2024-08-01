@@ -15,14 +15,12 @@ class SocketService {
   }
   IO.Socket? socket;
 
-  // StreamSocket streamSocket = StreamSocket();
-
   void connectAndListen() {
     socket ??= IO.io(urlForAvdLDplayer,
         IO.OptionBuilder().setTransports(['websocket']).build());
     socket?.connect();
     socket?.onConnect((data) {
-      print('Connect to sever socket');
+      print('👉👉 Connect to sever socket');
       socket?.emit('user_login', FirebaseAuth.instance.currentUser?.uid ?? '');
     });
     // print(FirebaseAuth.instance.currentUser?.uid);
@@ -54,7 +52,7 @@ class SocketService {
     if (socket != null) {
       socket!.disconnect();
       socket = null;
-      print('Disconnected server socket');
+      print('👉👉 Disconnected server socket');
     }
   }
 }

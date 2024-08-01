@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/features/pages/chatPage/chatPageViewModel/chat_page_view_model.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ReceiveMessageBubble extends StatelessWidget {
@@ -14,13 +13,12 @@ class ReceiveMessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var chatPageViewModel = ChatPageViewModel();
     // print(urlImageUser);
     return Row(
       children: [
         const SizedBox(width: 8),
         FutureBuilder(
-            future: chatPageViewModel.getUrlImageUser(userId),
+            future: ChatPageViewModel.getUrlImageUser(userId),
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data != '') {
                 return ClipRRect(

@@ -1,19 +1,19 @@
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../common/snackbar_common.dart';
 import '../../../models/accout_user.dart';
-import '../services/auth.dart';
+import '../services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class AuthController {
+class AuthViewModel {
   static FirebaseFirestore firestore = FirebaseFirestore.instance;
   static firebase_auth.User get user => auth.currentUser!;
   static firebase_auth.FirebaseAuth auth = firebase_auth.FirebaseAuth.instance;
-  // --- login accout google
+
+  //--- login accout google ---
   static Future<firebase_auth.UserCredential> _signInWithGoogle() async {
     // Trigger the authentication flow
 
@@ -33,6 +33,7 @@ class AuthController {
     return await auth.signInWithCredential(credential);
   }
 
+  //--- create data user and push data user ---
   static Future<void> createUser(String email, String id) async {
     String nameUser = email.toString();
     int splitIndex = nameUser.indexOf('@');
@@ -51,6 +52,7 @@ class AuthController {
     // await Supabase.instance.client.from('friends').insert({'userId': id});
   }
 
+  //--- Check if user is new or not ---
   static Future<String> isNewUser(String userId) async {
     final DocumentSnapshot snapshot =
         await FirebaseFirestore.instance.collection('users').doc(userId).get();
@@ -63,6 +65,7 @@ class AuthController {
     }
   }
 
+  //--- handle login accout google ---
   static Future<void> handleGoogleBtnClick(BuildContext context) async {
     _signInWithGoogle().then((userLogin) async {
       // print(userLogin);
@@ -82,11 +85,12 @@ class AuthController {
       });
     }).catchError((error) {
       debugPrint('Login accout google error:$error');
-      ScaffoldMessenger.of(context).showSnackBar(snackBarErrorOccurred);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackbarCommon.snackBarErrorOccurred);
     });
   }
 
-  // --- sign in email  and password
+  //--- sign in email  and password ---
   static Future<void> signInWithEmailAndPassword(
     BuildContext context,
     TextEditingController controllerUsername,
@@ -110,18 +114,21 @@ class AuthController {
       debugPrint('login : ${e.message}');
       if (e.message == 'The email address is badly formatted') {
         // print('asjd');
-        ScaffoldMessenger.of(context).showSnackBar(snackBarErrorFormatEmail);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackbarCommon.snackBarErrorFormatEmail);
       } else if (e.message ==
           'The password is invalid or the user does not have a password.') {
         // print('asjd');
-        ScaffoldMessenger.of(context).showSnackBar(snackbarIncorrectPassword);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackbarCommon.snackbarIncorrectPassword);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(snackBarErrorOccurred);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackbarCommon.snackBarErrorOccurred);
       }
     }
   }
 
-  // ---- create user
+  //--- handle create accout email ---
   static Future<void> createUserWithEmailAndPassword(
     BuildContext context,
     TextEditingController controllerUsername,
@@ -143,69 +150,16 @@ class AuthController {
       debugPrint('ERROR-createUserWithEmailAndPassword:${e.message}');
       if (e.message ==
           'The email address is already in use by another account.') {
-        ScaffoldMessenger.of(context).showSnackBar(snackbarUsedEmail);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackbarCommon.snackbarUsedEmail);
       }
       if (e.message == 'Password should be at least 6 characters') {
-        ScaffoldMessenger.of(context).showSnackBar(snackbarPassword);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackbarCommon.snackbarPassword);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(snackBarErrorOccurred);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackbarCommon.snackBarErrorOccurred);
       }
     }
   }
 }
-
-final snackBarErrorFormatEmail = SnackBar(
-  elevation: 0,
-  behavior: SnackBarBehavior.floating,
-  backgroundColor: Colors.transparent,
-  content: AwesomeSnackbarContent(
-    title: 'Warning!',
-    message: 'The email address is badly formatted, please try again !',
-    contentType: ContentType.warning,
-  ),
-);
-
-final snackBarErrorOccurred = SnackBar(
-  elevation: 0,
-  behavior: SnackBarBehavior.floating,
-  backgroundColor: Colors.transparent,
-  content: AwesomeSnackbarContent(
-    title: 'Warning!',
-    message: 'Something error occurred, please try again !',
-    contentType: ContentType.warning,
-  ),
-);
-
-final snackbarUsedEmail = SnackBar(
-  elevation: 0,
-  behavior: SnackBarBehavior.floating,
-  backgroundColor: Colors.transparent,
-  content: AwesomeSnackbarContent(
-    title: 'Warning!',
-    message:
-        'The email address is already in use by another account, please use another email !',
-    contentType: ContentType.warning,
-  ),
-);
-
-final snackbarPassword = SnackBar(
-  elevation: 0,
-  behavior: SnackBarBehavior.floating,
-  backgroundColor: Colors.transparent,
-  content: AwesomeSnackbarContent(
-    title: 'Warning!',
-    message: 'Password should be at least 6 characters, please !',
-    contentType: ContentType.warning,
-  ),
-);
-
-final snackbarIncorrectPassword = SnackBar(
-  elevation: 0,
-  behavior: SnackBarBehavior.floating,
-  backgroundColor: Colors.transparent,
-  content: AwesomeSnackbarContent(
-    title: 'Warning!',
-    message: 'Incorrect password, please try again !',
-    contentType: ContentType.warning,
-  ),
-);

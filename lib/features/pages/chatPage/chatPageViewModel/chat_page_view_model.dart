@@ -1,9 +1,11 @@
 import 'package:chat_app/features/pages/chatPage/models/message_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class ChatPageViewModel {
-  Future<void> pushData(MessageModel messageModel) async {
+  static Future<void> pushData(MessageModel messageModel) async {
     await Supabase.instance.client.from('messages').insert({
       'user_id': messageModel.roomId,
       'message': {
@@ -17,7 +19,8 @@ class ChatPageViewModel {
     });
   }
 
-  Future<List<MessageModel>> getMessages(String roomId) async {
+  //--- ---
+  static Future<List<MessageModel>> getMessages(String roomId) async {
     List<MessageModel> list = [];
     await Supabase.instance.client
         .from('messages')
@@ -33,7 +36,29 @@ class ChatPageViewModel {
     return list;
   }
 
-  Future<String> getUrlImageUser(String userId) async {
+  static MessageModel generateMessageModel(
+      String messageText, String roomId, String userId) {
+    final DateFormat formatter = DateFormat('HH:mm:ss dd/MM/yyyy');
+    final String timeNow = formatter.format(DateTime.now());
+
+    String id = const Uuid().v1();
+
+    List<String> userIdRoom = roomId.split('_');
+    List<String> receivedId =
+        userIdRoom.where((element) => element != userId).toList();
+
+    return MessageModel(
+      id: id,
+      roomId: roomId,
+      text: messageText,
+      senderId: userId,
+      receivedId: receivedId,
+      time: timeNow,
+    );
+  }
+
+  //--- ---
+  static Future<String> getUrlImageUser(String userId) async {
     String urlImage = '';
     if (userId == '') {
       return '';

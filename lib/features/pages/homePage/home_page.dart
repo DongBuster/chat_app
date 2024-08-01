@@ -33,9 +33,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void initState() {
     WidgetsBinding.instance.addObserver(this);
 
-    //---- fcm----
-    LocalNotificationService().uploadFcmToken();
-
     socketService.socket?.on('receive_unread_message', _onReceiveUnreadMessage);
     socketService.socket?.on('receive_last_message', _onReceiveLastMessage);
 
